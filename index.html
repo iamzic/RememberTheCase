@@ -103,6 +103,97 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
 
+        /* Confetti Animation Styles */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        .confetti:nth-child(odd) {
+            background: #4ecdc4;
+            width: 8px;
+            height: 8px;
+        }
+
+        .confetti:nth-child(3n) {
+            background: #ffd700;
+            width: 12px;
+            height: 12px;
+        }
+
+        .confetti:nth-child(4n) {
+            background: #ff9ff3;
+            width: 6px;
+            height: 6px;
+        }
+
+        .confetti:nth-child(5n) {
+            background: #54a0ff;
+            width: 14px;
+            height: 14px;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(50vh) rotate(360deg) scale(1.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .confetti-burst {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff6b6b, #ff5252);
+            border-radius: 50%;
+            animation: confetti-burst 1.5s ease-out forwards;
+        }
+
+        .confetti-burst:nth-child(odd) {
+            background: radial-gradient(circle, #4ecdc4, #45b7b8);
+        }
+
+        .confetti-burst:nth-child(3n) {
+            background: radial-gradient(circle, #ffd700, #ffed4e);
+        }
+
+        @keyframes confetti-burst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
         .game-board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -216,6 +307,7 @@
     </style>
 </head>
 <body>
+    <div class="confetti-container" id="confettiContainer"></div>
     <div class="game-container">
         <h1>🔤 Alphabet Matching Game</h1>
         <div class="instructions">
@@ -274,6 +366,94 @@
 
         function updateHighScoreDisplay() {
             document.getElementById('highScore').textContent = getHighScore();
+        }
+
+        // Confetti Animation Functions
+        function createConfetti() {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffd700', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff6348', '#2ed573', '#ffa502'];
+            
+            // Create falling confetti - INCREASED AMOUNT!
+            for (let i = 0; i < 120; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 4 + 's';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0%';
+                confetti.style.width = (Math.random() * 8 + 6) + 'px';
+                confetti.style.height = confetti.style.width;
+                container.appendChild(confetti);
+            }
+
+            // Create burst confetti at random positions - MORE BURSTS!
+            for (let i = 0; i < 40; i++) {
+                const burst = document.createElement('div');
+                burst.className = 'confetti-burst';
+                burst.style.left = Math.random() * 100 + '%';
+                burst.style.top = Math.random() * 100 + '%';
+                burst.style.animationDelay = Math.random() * 2 + 's';
+                burst.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}, ${colors[Math.floor(Math.random() * colors.length)]})`;
+                burst.style.width = (Math.random() * 15 + 15) + 'px';
+                burst.style.height = burst.style.width;
+                container.appendChild(burst);
+            }
+
+            // Create additional wave of confetti
+            setTimeout(() => {
+                for (let i = 0; i < 60; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.animationDelay = '0s';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0%';
+                    confetti.style.width = (Math.random() * 10 + 8) + 'px';
+                    confetti.style.height = confetti.style.width;
+                    container.appendChild(confetti);
+                }
+            }, 1000);
+
+            // Clean up confetti after animation
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        function createMatchConfetti() {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffd700', '#ff9ff3', '#54a0ff'];
+            
+            // Create MORE burst for individual matches
+            for (let i = 0; i < 35; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-burst';
+                confetti.style.left = (50 + (Math.random() - 0.5) * 30) + '%';
+                confetti.style.top = (50 + (Math.random() - 0.5) * 30) + '%';
+                confetti.style.animationDelay = Math.random() * 0.8 + 's';
+                confetti.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}, ${colors[Math.floor(Math.random() * colors.length)]})`;
+                confetti.style.width = (Math.random() * 15 + 8) + 'px';
+                confetti.style.height = confetti.style.width;
+                container.appendChild(confetti);
+            }
+
+            // Add some falling confetti for matches too
+            for (let i = 0; i < 15; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = (50 + (Math.random() - 0.5) * 40) + '%';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0%';
+                confetti.style.width = (Math.random() * 6 + 4) + 'px';
+                confetti.style.height = confetti.style.width;
+                container.appendChild(confetti);
+            }
+
+            // Clean up after animation
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 2500);
         }
 
         // Create alphabet pairs
@@ -411,6 +591,9 @@
                 updateTimer();
                 stopTimer();
                 
+                // Show confetti for successful match
+                createMatchConfetti();
+                
                 // Show points earned
                 showPointsEarned(points, matchTime);
                 
@@ -428,6 +611,16 @@
                     }
                     
                     setTimeout(() => {
+                        // Create big confetti celebration for game completion
+                        createConfetti();
+                        
+                        // Extra confetti for new high score!
+                        if (isNewHighScore) {
+                            setTimeout(() => {
+                                createConfetti();
+                            }, 2000);
+                        }
+                        
                         let message = `🎉 Congratulations! You matched all the letters!<br>Final Score: ${gameState.totalScore} points`;
                         if (isNewHighScore) {
                             message += `<br>🏆 NEW HIGH SCORE!`;
