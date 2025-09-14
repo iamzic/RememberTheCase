@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alphabet Matching Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .score {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .timer {
+            color: #ff6b6b;
+        }
+
+        .score-points {
+            color: #4ecdc4;
+        }
+
+        .high-score {
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .high-score-label {
+            font-size: 1.1em;
+            color: #b8860b;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .high-score-value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #8b6914;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .letter-card {
+            background: linear-gradient(145deg, #ff6b6b, #ff5252);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .letter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .letter-card.hidden {
+            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+            color: transparent;
+        }
+
+        .letter-card.hidden:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+        }
+
+        .letter-card.revealed {
+            background: linear-gradient(145deg, #4ecdc4, #45b7b8);
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .letter-card.matched {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            transform: scale(0.95);
+            cursor: default;
+        }
+
+        .letter-card.matched:hover {
+            transform: scale(0.95);
+        }
+
+        .letter-card::before {
+            content: '?';
+            position: absolute;
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .letter-card.revealed::before,
+        .letter-card.matched::before {
+            opacity: 0;
+        }
+
+        .controls {
+            text-align: center;
+        }
+
+        .reset-btn {
+            background: linear-gradient(145deg, #4ecdc4, #45b7b8);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+
+        .success {
+            color: #27ae60;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🔤 Alphabet Matching Game</h1>
+        <div class="instructions">
+            Click cards to reveal letters and match each uppercase letter with its lowercase pair!<br>
+            Cards will hide again if they don't match.
+        </div>
+        <div class="high-score">
+            <div class="high-score-label">🏆 High Score</div>
+            <div class="high-score-value" id="highScore">0</div>
+        </div>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-label">Matches</div>
+                <div class="stat-value"><span id="score">0</span> / 13</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Current Time</div>
+                <div class="stat-value timer" id="currentTimer">0.0s</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Total Score</div>
+                <div class="stat-value score-points" id="totalScore">0</div>
+            </div>
+        </div>
+        <div class="game-board" id="gameBoard">
+            <!-- Letters will be generated by JavaScript -->
+        </div>
+        <div class="controls">
+            <button class="reset-btn" onclick="resetGame()">🔄 New Game</button>
+        </div>
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        let gameState = {
+            cards: [],
+            selectedCards: [],
+            matchedPairs: 0,
+            totalPairs: 13,
+            isProcessing: false,
+            revealedCards: [],
+            currentMatchStartTime: null,
+            totalScore: 0,
+            timerInterval: null,
+            gameCompleted: false
+        };
+
+        // High score management
+        function getHighScore() {
+            return parseInt(localStorage.getItem('alphabetGameHighScore') || '0');
+        }
+
+        function setHighScore(score) {
+            localStorage.setItem('alphabetGameHighScore', score.toString());
+        }
+
+        function updateHighScoreDisplay() {
+            document.getElementById('highScore').textContent = getHighScore();
+        }
+
+        // Create alphabet pairs
+        const alphabetPairs = [];
+        for (let i = 0; i < 26; i++) {
+            const uppercase = String.fromCharCode(65 + i);
+            const lowercase = String.fromCharCode(97 + i);
+            alphabetPairs.push({ uppercase, lowercase });
+        }
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize game
+        function initGame() {
+            // Select 13 random pairs
+            const selectedPairs = shuffleArray(alphabetPairs).slice(0, 13);
+            
+            // Create cards array with both uppercase and lowercase
+            gameState.cards = [];
+            selectedPairs.forEach(pair => {
+                gameState.cards.push({
+                    id: `upper-${pair.uppercase}`,
+                    letter: pair.uppercase,
+                    type: 'uppercase',
+                    pair: pair.lowercase
+                });
+                gameState.cards.push({
+                    id: `lower-${pair.lowercase}`,
+                    letter: pair.lowercase,
+                    type: 'lowercase',
+                    pair: pair.uppercase
+                });
+            });
+
+            // Shuffle the cards
+            gameState.cards = shuffleArray(gameState.cards);
+            gameState.selectedCards = [];
+            gameState.matchedPairs = 0;
+            gameState.isProcessing = false;
+            gameState.revealedCards = [];
+            gameState.currentMatchStartTime = null;
+            gameState.totalScore = 0;
+            gameState.gameCompleted = false;
+
+            // Clear any existing timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+
+            renderGame();
+            updateScore();
+            updateTimer();
+            updateHighScoreDisplay();
+            document.getElementById('message').textContent = '';
+        }
+
+        // Render the game board
+        function renderGame() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+
+            gameState.cards.forEach(card => {
+                const cardElement = document.createElement('button');
+                cardElement.className = 'letter-card';
+                cardElement.textContent = card.letter;
+                cardElement.id = card.id;
+                
+                if (card.matched) {
+                    cardElement.classList.add('matched');
+                } else if (gameState.revealedCards.includes(card.id)) {
+                    cardElement.classList.add('revealed');
+                } else {
+                    cardElement.classList.add('hidden');
+                }
+
+                cardElement.addEventListener('click', () => handleCardClick(card.id));
+                gameBoard.appendChild(cardElement);
+            });
+        }
+
+        // Handle card click
+        function handleCardClick(cardId) {
+            if (gameState.isProcessing || gameState.gameCompleted) return;
+
+            const card = gameState.cards.find(c => c.id === cardId);
+            if (!card || card.matched || gameState.revealedCards.includes(cardId)) return;
+
+            // Start timer for this match attempt if this is the first card
+            if (gameState.selectedCards.length === 0) {
+                gameState.currentMatchStartTime = Date.now();
+                startTimer();
+            }
+
+            // Reveal the card
+            gameState.revealedCards.push(cardId);
+            gameState.selectedCards.push(cardId);
+            renderGame();
+
+            if (gameState.selectedCards.length === 2) {
+                gameState.isProcessing = true;
+                setTimeout(checkMatch, 1000);
+            }
+        }
+
+        // Check if selected cards match
+        function checkMatch() {
+            const [card1Id, card2Id] = gameState.selectedCards;
+            const card1 = gameState.cards.find(c => c.id === card1Id);
+            const card2 = gameState.cards.find(c => c.id === card2Id);
+
+            // Calculate time taken for this match attempt
+            const matchTime = gameState.currentMatchStartTime ? 
+                (Date.now() - gameState.currentMatchStartTime) / 1000 : 0;
+
+            if (card1.pair === card2.letter && card2.pair === card1.letter) {
+                // Match found!
+                card1.matched = true;
+                card2.matched = true;
+                gameState.matchedPairs++;
+                
+                // Calculate score based on speed (faster = higher score)
+                const points = calculateScore(matchTime);
+                gameState.totalScore += points;
+                
+                updateScore();
+                updateTimer();
+                stopTimer();
+                
+                // Show points earned
+                showPointsEarned(points, matchTime);
+                
+                if (gameState.matchedPairs === gameState.totalPairs) {
+                    gameState.gameCompleted = true;
+                    stopTimer();
+                    
+                    // Check for new high score
+                    const currentHighScore = getHighScore();
+                    const isNewHighScore = gameState.totalScore > currentHighScore;
+                    
+                    if (isNewHighScore) {
+                        setHighScore(gameState.totalScore);
+                        updateHighScoreDisplay();
+                    }
+                    
+                    setTimeout(() => {
+                        let message = `🎉 Congratulations! You matched all the letters!<br>Final Score: ${gameState.totalScore} points`;
+                        if (isNewHighScore) {
+                            message += `<br>🏆 NEW HIGH SCORE!`;
+                        } else if (currentHighScore > 0) {
+                            message += `<br>High Score: ${currentHighScore} points`;
+                        }
+                        document.getElementById('message').innerHTML = message;
+                        document.getElementById('message').className = 'message success';
+                    }, 1500);
+                }
+            } else {
+                // No match - hide the cards again
+                gameState.revealedCards = gameState.revealedCards.filter(id => 
+                    id !== card1Id && id !== card2Id
+                );
+                document.getElementById('message').textContent = 'Try again!';
+                stopTimer();
+                setTimeout(() => {
+                    document.getElementById('message').textContent = '';
+                }, 1000);
+            }
+
+            gameState.selectedCards = [];
+            gameState.isProcessing = false;
+            gameState.currentMatchStartTime = null;
+            renderGame();
+        }
+
+        // Update score display
+        function updateScore() {
+            document.getElementById('score').textContent = gameState.matchedPairs;
+            document.getElementById('totalScore').textContent = gameState.totalScore;
+        }
+
+        // Start timer
+        function startTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            gameState.timerInterval = setInterval(() => {
+                if (gameState.currentMatchStartTime) {
+                    const elapsed = (Date.now() - gameState.currentMatchStartTime) / 1000;
+                    document.getElementById('currentTimer').textContent = elapsed.toFixed(1) + 's';
+                }
+            }, 100);
+        }
+
+        // Stop timer
+        function stopTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+            document.getElementById('currentTimer').textContent = '0.0s';
+        }
+
+        // Update timer display
+        function updateTimer() {
+            if (gameState.currentMatchStartTime) {
+                const elapsed = (Date.now() - gameState.currentMatchStartTime) / 1000;
+                document.getElementById('currentTimer').textContent = elapsed.toFixed(1) + 's';
+            } else {
+                document.getElementById('currentTimer').textContent = '0.0s';
+            }
+        }
+
+        // Calculate score based on match time
+        function calculateScore(matchTime) {
+            // Base score is 100 points
+            // Bonus points for speed: 50 points for under 2 seconds, 25 for under 4 seconds
+            // Penalty for slow matches: lose 10 points per second over 6 seconds
+            let points = 100;
+            
+            if (matchTime <= 2) {
+                points += 50; // Lightning fast!
+            } else if (matchTime <= 4) {
+                points += 25; // Pretty fast!
+            } else if (matchTime > 6) {
+                points -= Math.floor((matchTime - 6) * 10); // Penalty for slow matches
+            }
+            
+            return Math.max(points, 10); // Minimum 10 points
+        }
+
+        // Show points earned animation
+        function showPointsEarned(points, time) {
+            // Only show temporary message if game is not completed
+            if (!gameState.gameCompleted) {
+                const message = document.getElementById('message');
+                const timeText = time <= 2 ? '⚡ Lightning!' : time <= 4 ? '🚀 Fast!' : '👍 Good!';
+                message.innerHTML = `+${points} points ${timeText}<br>Time: ${time.toFixed(1)}s`;
+                message.className = 'message success';
+                
+                setTimeout(() => {
+                    if (!gameState.gameCompleted) {
+                        message.textContent = '';
+                        message.className = 'message';
+                    }
+                }, 2000);
+            }
+        }
+
+        // Reset game
+        function resetGame() {
+            initGame();
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('load', () => {
+            updateHighScoreDisplay();
+            initGame();
+        });
+    </script>
+</body>
+</html>
