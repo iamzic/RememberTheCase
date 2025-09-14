@@ -103,6 +103,51 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
 
+        .language-selector {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .language-selector h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .language-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .language-btn {
+            background: linear-gradient(145deg, #4ecdc4, #45b7b8);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+        }
+
+        .language-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+        }
+
+        .language-btn.selected {
+            background: linear-gradient(145deg, #ff6b6b, #ff5252);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
         /* Confetti Animation Styles */
         .confetti-container {
             position: fixed;
@@ -310,6 +355,17 @@
     <div class="confetti-container" id="confettiContainer"></div>
     <div class="game-container">
         <h1>🔤 Alphabet Matching Game</h1>
+        <div class="language-selector">
+            <h3>🌍 Choose Language</h3>
+            <div class="language-buttons">
+                <button class="language-btn selected" onclick="selectLanguage('english')">English</button>
+                <button class="language-btn" onclick="selectLanguage('spanish')">Español</button>
+                <button class="language-btn" onclick="selectLanguage('hindi')">हिन्दी</button>
+                <button class="language-btn" onclick="selectLanguage('marathi')">मराठी</button>
+                <button class="language-btn" onclick="selectLanguage('german')">Deutsch</button>
+                <button class="language-btn" onclick="selectLanguage('french')">Français</button>
+            </div>
+        </div>
         <div class="instructions">
             Click cards to reveal letters and match each uppercase letter with its lowercase pair!<br>
             Cards will hide again if they don't match.
@@ -352,8 +408,160 @@
             currentMatchStartTime: null,
             totalScore: 0,
             timerInterval: null,
-            gameCompleted: false
+            gameCompleted: false,
+            currentLanguage: 'english'
         };
+
+        // Alphabet data for different languages
+        const alphabetData = {
+            english: {
+                name: 'English',
+                pairs: (() => {
+                    const pairs = [];
+                    for (let i = 0; i < 26; i++) {
+                        const uppercase = String.fromCharCode(65 + i);
+                        const lowercase = String.fromCharCode(97 + i);
+                        pairs.push({ uppercase, lowercase });
+                    }
+                    return pairs;
+                })()
+            },
+            spanish: {
+                name: 'Español',
+                pairs: [
+                    { uppercase: 'A', lowercase: 'a' }, { uppercase: 'B', lowercase: 'b' },
+                    { uppercase: 'C', lowercase: 'c' }, { uppercase: 'D', lowercase: 'd' },
+                    { uppercase: 'E', lowercase: 'e' }, { uppercase: 'F', lowercase: 'f' },
+                    { uppercase: 'G', lowercase: 'g' }, { uppercase: 'H', lowercase: 'h' },
+                    { uppercase: 'I', lowercase: 'i' }, { uppercase: 'J', lowercase: 'j' },
+                    { uppercase: 'K', lowercase: 'k' }, { uppercase: 'L', lowercase: 'l' },
+                    { uppercase: 'M', lowercase: 'm' }, { uppercase: 'N', lowercase: 'n' },
+                    { uppercase: 'Ñ', lowercase: 'ñ' }, { uppercase: 'O', lowercase: 'o' },
+                    { uppercase: 'P', lowercase: 'p' }, { uppercase: 'Q', lowercase: 'q' },
+                    { uppercase: 'R', lowercase: 'r' }, { uppercase: 'S', lowercase: 's' },
+                    { uppercase: 'T', lowercase: 't' }, { uppercase: 'U', lowercase: 'u' },
+                    { uppercase: 'V', lowercase: 'v' }, { uppercase: 'W', lowercase: 'w' },
+                    { uppercase: 'X', lowercase: 'x' }, { uppercase: 'Y', lowercase: 'y' },
+                    { uppercase: 'Z', lowercase: 'z' }
+                ]
+            },
+            hindi: {
+                name: 'हिन्दी',
+                pairs: [
+                    { uppercase: 'अ', lowercase: 'अ' }, { uppercase: 'आ', lowercase: 'आ' },
+                    { uppercase: 'इ', lowercase: 'इ' }, { uppercase: 'ई', lowercase: 'ई' },
+                    { uppercase: 'उ', lowercase: 'उ' }, { uppercase: 'ऊ', lowercase: 'ऊ' },
+                    { uppercase: 'ए', lowercase: 'ए' }, { uppercase: 'ऐ', lowercase: 'ऐ' },
+                    { uppercase: 'ओ', lowercase: 'ओ' }, { uppercase: 'औ', lowercase: 'औ' },
+                    { uppercase: 'क', lowercase: 'क' }, { uppercase: 'ख', lowercase: 'ख' },
+                    { uppercase: 'ग', lowercase: 'ग' }, { uppercase: 'घ', lowercase: 'घ' },
+                    { uppercase: 'च', lowercase: 'च' }, { uppercase: 'छ', lowercase: 'छ' },
+                    { uppercase: 'ज', lowercase: 'ज' }, { uppercase: 'झ', lowercase: 'झ' },
+                    { uppercase: 'ट', lowercase: 'ट' }, { uppercase: 'ठ', lowercase: 'ठ' },
+                    { uppercase: 'ड', lowercase: 'ड' }, { uppercase: 'ढ', lowercase: 'ढ' },
+                    { uppercase: 'ण', lowercase: 'ण' }, { uppercase: 'त', lowercase: 'त' },
+                    { uppercase: 'थ', lowercase: 'थ' }, { uppercase: 'द', lowercase: 'द' },
+                    { uppercase: 'ध', lowercase: 'ध' }, { uppercase: 'न', lowercase: 'न' },
+                    { uppercase: 'प', lowercase: 'प' }, { uppercase: 'फ', lowercase: 'फ' },
+                    { uppercase: 'ब', lowercase: 'ब' }, { uppercase: 'भ', lowercase: 'भ' },
+                    { uppercase: 'म', lowercase: 'म' }, { uppercase: 'य', lowercase: 'य' },
+                    { uppercase: 'र', lowercase: 'र' }, { uppercase: 'ल', lowercase: 'ल' },
+                    { uppercase: 'व', lowercase: 'व' }, { uppercase: 'श', lowercase: 'श' },
+                    { uppercase: 'ष', lowercase: 'ष' }, { uppercase: 'स', lowercase: 'स' },
+                    { uppercase: 'ह', lowercase: 'ह' }
+                ]
+            },
+            marathi: {
+                name: 'मराठी',
+                pairs: [
+                    { uppercase: 'अ', lowercase: 'अ' }, { uppercase: 'आ', lowercase: 'आ' },
+                    { uppercase: 'इ', lowercase: 'इ' }, { uppercase: 'ई', lowercase: 'ई' },
+                    { uppercase: 'उ', lowercase: 'उ' }, { uppercase: 'ऊ', lowercase: 'ऊ' },
+                    { uppercase: 'ए', lowercase: 'ए' }, { uppercase: 'ऐ', lowercase: 'ऐ' },
+                    { uppercase: 'ओ', lowercase: 'ओ' }, { uppercase: 'औ', lowercase: 'औ' },
+                    { uppercase: 'क', lowercase: 'क' }, { uppercase: 'ख', lowercase: 'ख' },
+                    { uppercase: 'ग', lowercase: 'ग' }, { uppercase: 'घ', lowercase: 'घ' },
+                    { uppercase: 'च', lowercase: 'च' }, { uppercase: 'छ', lowercase: 'छ' },
+                    { uppercase: 'ज', lowercase: 'ज' }, { uppercase: 'झ', lowercase: 'झ' },
+                    { uppercase: 'ट', lowercase: 'ट' }, { uppercase: 'ठ', lowercase: 'ठ' },
+                    { uppercase: 'ड', lowercase: 'ड' }, { uppercase: 'ढ', lowercase: 'ढ' },
+                    { uppercase: 'ण', lowercase: 'ण' }, { uppercase: 'त', lowercase: 'त' },
+                    { uppercase: 'थ', lowercase: 'थ' }, { uppercase: 'द', lowercase: 'द' },
+                    { uppercase: 'ध', lowercase: 'ध' }, { uppercase: 'न', lowercase: 'न' },
+                    { uppercase: 'प', lowercase: 'प' }, { uppercase: 'फ', lowercase: 'फ' },
+                    { uppercase: 'ब', lowercase: 'ब' }, { uppercase: 'भ', lowercase: 'भ' },
+                    { uppercase: 'म', lowercase: 'म' }, { uppercase: 'य', lowercase: 'य' },
+                    { uppercase: 'र', lowercase: 'र' }, { uppercase: 'ल', lowercase: 'ल' },
+                    { uppercase: 'व', lowercase: 'व' }, { uppercase: 'श', lowercase: 'श' },
+                    { uppercase: 'ष', lowercase: 'ष' }, { uppercase: 'स', lowercase: 'स' },
+                    { uppercase: 'ह', lowercase: 'ह' }
+                ]
+            },
+            german: {
+                name: 'Deutsch',
+                pairs: [
+                    { uppercase: 'A', lowercase: 'a' }, { uppercase: 'B', lowercase: 'b' },
+                    { uppercase: 'C', lowercase: 'c' }, { uppercase: 'D', lowercase: 'd' },
+                    { uppercase: 'E', lowercase: 'e' }, { uppercase: 'F', lowercase: 'f' },
+                    { uppercase: 'G', lowercase: 'g' }, { uppercase: 'H', lowercase: 'h' },
+                    { uppercase: 'I', lowercase: 'i' }, { uppercase: 'J', lowercase: 'j' },
+                    { uppercase: 'K', lowercase: 'k' }, { uppercase: 'L', lowercase: 'l' },
+                    { uppercase: 'M', lowercase: 'm' }, { uppercase: 'N', lowercase: 'n' },
+                    { uppercase: 'O', lowercase: 'o' }, { uppercase: 'P', lowercase: 'p' },
+                    { uppercase: 'Q', lowercase: 'q' }, { uppercase: 'R', lowercase: 'r' },
+                    { uppercase: 'S', lowercase: 's' }, { uppercase: 'T', lowercase: 't' },
+                    { uppercase: 'U', lowercase: 'u' }, { uppercase: 'V', lowercase: 'v' },
+                    { uppercase: 'W', lowercase: 'w' }, { uppercase: 'X', lowercase: 'x' },
+                    { uppercase: 'Y', lowercase: 'y' }, { uppercase: 'Z', lowercase: 'z' },
+                    { uppercase: 'Ä', lowercase: 'ä' }, { uppercase: 'Ö', lowercase: 'ö' },
+                    { uppercase: 'Ü', lowercase: 'ü' }, { uppercase: 'ß', lowercase: 'ß' }
+                ]
+            },
+            french: {
+                name: 'Français',
+                pairs: [
+                    { uppercase: 'A', lowercase: 'a' }, { uppercase: 'B', lowercase: 'b' },
+                    { uppercase: 'C', lowercase: 'c' }, { uppercase: 'D', lowercase: 'd' },
+                    { uppercase: 'E', lowercase: 'e' }, { uppercase: 'F', lowercase: 'f' },
+                    { uppercase: 'G', lowercase: 'g' }, { uppercase: 'H', lowercase: 'h' },
+                    { uppercase: 'I', lowercase: 'i' }, { uppercase: 'J', lowercase: 'j' },
+                    { uppercase: 'K', lowercase: 'k' }, { uppercase: 'L', lowercase: 'l' },
+                    { uppercase: 'M', lowercase: 'm' }, { uppercase: 'N', lowercase: 'n' },
+                    { uppercase: 'O', lowercase: 'o' }, { uppercase: 'P', lowercase: 'p' },
+                    { uppercase: 'Q', lowercase: 'q' }, { uppercase: 'R', lowercase: 'r' },
+                    { uppercase: 'S', lowercase: 's' }, { uppercase: 'T', lowercase: 't' },
+                    { uppercase: 'U', lowercase: 'u' }, { uppercase: 'V', lowercase: 'v' },
+                    { uppercase: 'W', lowercase: 'w' }, { uppercase: 'X', lowercase: 'x' },
+                    { uppercase: 'Y', lowercase: 'y' }, { uppercase: 'Z', lowercase: 'z' },
+                    { uppercase: 'À', lowercase: 'à' }, { uppercase: 'É', lowercase: 'é' },
+                    { uppercase: 'È', lowercase: 'è' }, { uppercase: 'Ç', lowercase: 'ç' }
+                ]
+            }
+        };
+
+        // Language management
+        function getSelectedLanguage() {
+            return localStorage.getItem('alphabetGameLanguage') || 'english';
+        }
+
+        function setSelectedLanguage(language) {
+            localStorage.setItem('alphabetGameLanguage', language);
+        }
+
+        function selectLanguage(language) {
+            // Update selected button
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            // Update game state
+            gameState.currentLanguage = language;
+            setSelectedLanguage(language);
+            
+            // Reset and restart game with new language
+            initGame();
+        }
 
         // High score management
         function getHighScore() {
@@ -456,12 +664,9 @@
             }, 2500);
         }
 
-        // Create alphabet pairs
-        const alphabetPairs = [];
-        for (let i = 0; i < 26; i++) {
-            const uppercase = String.fromCharCode(65 + i);
-            const lowercase = String.fromCharCode(97 + i);
-            alphabetPairs.push({ uppercase, lowercase });
+        // Get alphabet pairs for current language
+        function getAlphabetPairs() {
+            return alphabetData[gameState.currentLanguage].pairs;
         }
 
         // Shuffle array function
@@ -476,8 +681,12 @@
 
         // Initialize game
         function initGame() {
-            // Select 13 random pairs
-            const selectedPairs = shuffleArray(alphabetPairs).slice(0, 13);
+            // Get alphabet pairs for current language
+            const alphabetPairs = getAlphabetPairs();
+            
+            // Select 13 random pairs (or fewer if language has fewer letters)
+            const maxPairs = Math.min(13, Math.floor(alphabetPairs.length / 2));
+            const selectedPairs = shuffleArray(alphabetPairs).slice(0, maxPairs);
             
             // Create cards array with both uppercase and lowercase
             gameState.cards = [];
@@ -505,6 +714,7 @@
             gameState.currentMatchStartTime = null;
             gameState.totalScore = 0;
             gameState.gameCompleted = false;
+            gameState.totalPairs = maxPairs;
 
             // Clear any existing timer
             if (gameState.timerInterval) {
@@ -731,6 +941,18 @@
 
         // Initialize the game when page loads
         window.addEventListener('load', () => {
+            // Load saved language
+            const savedLanguage = getSelectedLanguage();
+            gameState.currentLanguage = savedLanguage;
+            
+            // Update language button selection
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.onclick.toString().includes(savedLanguage)) {
+                    btn.classList.add('selected');
+                }
+            });
+            
             updateHighScoreDisplay();
             initGame();
         });
