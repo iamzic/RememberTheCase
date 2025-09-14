@@ -753,12 +753,42 @@
             });
         }
 
+        // Play sound for selected letter using SpeechSynthesis, with best matching voice
+        function playLetterSound(letter, language) {
+            let langCode = 'en-US';
+            switch (language) {
+                case 'spanish': langCode = 'es-ES'; break;
+                case 'hindi': langCode = 'hi-IN'; break;
+                case 'marathi': langCode = 'mr-IN'; break;
+                case 'german': langCode = 'de-DE'; break;
+                case 'french': langCode = 'fr-FR'; break;
+                default: langCode = 'en-US'; break;
+            }
+            const utter = new window.SpeechSynthesisUtterance(letter);
+            utter.lang = langCode;
+            utter.rate = 0.8;
+            // Try to select the best matching voice
+            const voices = window.speechSynthesis.getVoices();
+            const matchVoice = voices.find(v => v.lang === langCode);
+            if (matchVoice) {
+                utter.voice = matchVoice;
+            } else {
+                // Try partial match (e.g., 'hi' for Hindi)
+                const partial = voices.find(v => v.lang.startsWith(langCode.split('-')[0]));
+                if (partial) utter.voice = partial;
+            }
+            window.speechSynthesis.speak(utter);
+        }
+
         // Handle card click
         function handleCardClick(cardId) {
             if (gameState.isProcessing || gameState.gameCompleted) return;
 
             const card = gameState.cards.find(c => c.id === cardId);
             if (!card || card.matched || gameState.revealedCards.includes(cardId)) return;
+
+            // Play sound for selected letter
+            playLetterSound(card.letter, gameState.currentLanguage);
 
             // Start timer for this match attempt if this is the first card
             if (gameState.selectedCards.length === 0) {
